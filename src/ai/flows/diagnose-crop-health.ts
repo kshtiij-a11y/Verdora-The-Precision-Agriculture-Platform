@@ -8,7 +8,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {retryTransientModelErrors} from '@/ai/retry';
+import {withTransientModelRetry} from '@/ai/retry';
 import {z} from 'genkit';
 
 const DiagnoseCropHealthInputSchema = z.object({
@@ -63,7 +63,7 @@ const diagnoseCropHealthFlow = ai.defineFlow(
     outputSchema: DiagnoseCropHealthOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input, { model: 'googleai/gemini-3.8-flash', use: [retryTransientModelErrors] });
+    const {output} = await withTransientModelRetry(() => prompt(input, { model: 'googleai/gemini-3.8-flash' }));
     return output!;
   }
 );
