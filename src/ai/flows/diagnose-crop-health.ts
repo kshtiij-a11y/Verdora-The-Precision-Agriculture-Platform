@@ -62,7 +62,7 @@ const diagnoseCropHealthFlow = ai.defineFlow(
     outputSchema: DiagnoseCropHealthOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input, { model: 'googleai/gemini-2.5-flash' });
+    const {output} = await prompt(input, { model: 'googleai/gemini-3.8-flash' });
     return output!;
   }
 );
