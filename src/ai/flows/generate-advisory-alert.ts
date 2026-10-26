@@ -8,7 +8,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {retryTransientModelErrors} from '@/ai/retry';
+import {withTransientModelRetry} from '@/ai/retry';
 import { getAgricultureNews } from '@/ai/tools/agri-tools';
 import {z} from 'genkit';
 
@@ -52,7 +52,7 @@ const generateAdvisoryAlertFlow = ai.defineFlow(
     outputSchema: GenerateAdvisoryAlertOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input, { use: [retryTransientModelErrors] });
+    const {output} = await withTransientModelRetry(() => prompt(input));
     return output!;
   }
 );
