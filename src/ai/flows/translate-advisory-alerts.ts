@@ -10,7 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {retryTransientModelErrors} from '@/ai/retry';
+import {withTransientModelRetry} from '@/ai/retry';
 import {z} from 'genkit';
 
 const TranslateAdvisoryAlertsInputSchema = z.object({
@@ -46,7 +46,7 @@ const translateAdvisoryAlertsFlow = ai.defineFlow(
     outputSchema: TranslateAdvisoryAlertsOutputSchema,
   },
   async input => {
-    const {output} = await translateAdvisoryAlertsPrompt(input, { model: 'googleai/gemini-3.8-flash', use: [retryTransientModelErrors] });
+    const {output} = await withTransientModelRetry(() => translateAdvisoryAlertsPrompt(input, { model: 'googleai/gemini-3.8-flash' }));
     return output!;
   }
 );
