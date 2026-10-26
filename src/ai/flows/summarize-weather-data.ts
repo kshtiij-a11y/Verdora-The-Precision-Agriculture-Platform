@@ -8,7 +8,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {retryTransientModelErrors} from '@/ai/retry';
+import {withTransientModelRetry} from '@/ai/retry';
 import {z} from 'genkit';
 
 const SummarizeWeatherDataInputSchema = z.object({
@@ -51,7 +51,7 @@ const summarizeWeatherDataFlow = ai.defineFlow(
     outputSchema: SummarizeWeatherDataOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input, { use: [retryTransientModelErrors] });
+    const {output} = await withTransientModelRetry(() => prompt(input));
     return output!;
   }
 );
