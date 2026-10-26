@@ -9,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {retryTransientModelErrors} from '@/ai/retry';
 import { getWeatherSummary, getMarketPrices, getAgricultureNews } from '@/ai/tools/agri-tools';
 import { googleAI } from '@genkit-ai/googleai';
 import {Content, MessageData} from 'genkit/model';
@@ -62,6 +63,7 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
 
   const response = await ai.generate({
     model: 'googleai/gemini-3.8-flash',
+    use: [retryTransientModelErrors],
     tools: [googleAI.trustedSearch, getWeatherSummary, getMarketPrices, getAgricultureNews],
     history: [
       {role: 'system', content: [{text: systemPrompt}]},
