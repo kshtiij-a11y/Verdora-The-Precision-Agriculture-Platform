@@ -62,7 +62,7 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
   for (let attempt = 0; attempt < 4; attempt++) {
     try {
       response = await ai.generate({
-        model: 'googleai/gemini-3.8-flash',
+        model: 'googleai/gemini-3.5-flash-lite',
         tools: [getWeatherSummary, getMarketPrices, getAgricultureNews],
         prompt: [
           {text: `System instructions:\n${systemPrompt}`},
@@ -77,9 +77,12 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
       break;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      const isTemporaryServerError = message.includes('503') || message.includes('Service Unavailable');
+      const isTemporaryServerError = /503|Service Unavailable|429|Too Many Requests|quota|high demand/i.test(message);
       if (!isTemporaryServerError || attempt === 3) {
-        throw error;
+        if (/429|quota|Too Many Requests/i.test(message)) {
+          throw new Error('The AI assistant has reached its current API usage limit. Please try again after the quota resets.');
+        }
+        throw new Error('The AI assistant is temporarily unavailable. Please try again shortly.');
       }
       await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
     }
