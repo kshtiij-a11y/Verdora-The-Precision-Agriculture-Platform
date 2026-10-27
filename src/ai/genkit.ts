@@ -16,10 +16,10 @@ export const ai = genkit({
       apiKey: geminiApiKey,
       generate: {
         retry: {
-          // Retry on 429 (Too Many Requests) and 503 (Service Unavailable) errors
+          // Retry only temporary 503 errors; quota errors will not be fixed by retrying
           on: (err: any) => {
             const message = err.message || '';
-            return message.includes('429') || message.includes('503');
+            return message.includes('503') || message.includes('Service Unavailable');
           },
         },
       },
