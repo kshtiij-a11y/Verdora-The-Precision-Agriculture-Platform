@@ -28,7 +28,7 @@ import { useAppContext } from "@/context/AppContext";
 import { generateAdvisoryAlert } from "@/ai/flows/generate-advisory-alert";
 import { textToSpeech } from "@/ai/flows/text-to-speech";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useFarmerAppContext } from "@/context/FarmerAppContext";
+import { useOptionalFarmerAppContext } from "@/context/FarmerAppContext";
 
 export function AdvisoryAlerts() {
   const pathname = usePathname();
@@ -36,11 +36,7 @@ export function AdvisoryAlerts() {
 
   const { registeredFarmer, addSmsToHistory } = useAppContext();
   
-  // Conditionally get farmer-specific context
-  let farmerContext;
-  if (isFarmerPortal) {
-    farmerContext = useFarmerAppContext();
-  }
+  const farmerContext = useOptionalFarmerAppContext();
   const { availableLanguages = { English: 'English' } } = farmerContext || {};
   
   const [isTranslatePending, startTranslateTransition] = useTransition();
