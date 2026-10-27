@@ -42,7 +42,3 @@
     };
   };
 }
-
-# Timestamp refresh only.
-
-# Timestamp refresh only.
