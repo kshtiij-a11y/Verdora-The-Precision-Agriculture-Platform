@@ -78,5 +78,3 @@ export function Sidebar() {
         </aside>
     );
 }
-
-// Repository maintenance: timestamp refresh only.
