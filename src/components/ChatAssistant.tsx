@@ -114,9 +114,12 @@ export function ChatAssistant() {
         } catch (error: any) {
             console.error("Chat failed:", error);
             
+            const errorMessage = error instanceof Error ? error.message : String(error);
             let displayMessage = "Sorry, I encountered an error. Please try again.";
-            if (error.message && error.message.includes('503 Service Unavailable')) {
-                displayMessage = "The AI model is currently overloaded. Please wait a moment and try again.";
+            if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
+                displayMessage = "The AI service has reached its request limit. Please try again after the quota resets or the project limit is increased.";
+            } else if (errorMessage.includes('503') || errorMessage.includes('Service Unavailable')) {
+                displayMessage = "The AI model is temporarily overloaded. Please wait a moment and try again.";
             }
 
             const errorMessage: Message = {
