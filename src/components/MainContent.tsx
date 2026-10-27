@@ -26,5 +26,3 @@ export function MainContent({ children }: { children: React.ReactNode }) {
     </>
   );
 }
-
-// Repository maintenance: timestamp refresh only.
