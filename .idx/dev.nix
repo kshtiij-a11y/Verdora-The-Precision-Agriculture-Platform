@@ -42,3 +42,5 @@
     };
   };
 }
+
+# Timestamp refresh only.
