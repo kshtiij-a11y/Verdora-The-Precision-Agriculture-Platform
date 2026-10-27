@@ -50,7 +50,46 @@ const summarizeWeatherDataFlow = ai.defineFlow(
     outputSchema: SummarizeWeatherDataOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const { output } = await prompt(input);
+      if (output?.summary) return output;
+    } catch (error) {
+      // Keep the weather feature useful when Gemini is temporarily unavailable.
+      console.error('Gemini weather summary failed; using rule-based fallback:', error);
+    }
+
+    let data: any;
+    try {
+      data = JSON.parse(input.weatherData);
+    } catch {
+      return { summary: `Weather data for ${input.location} was retrieved, but the AI summary service is temporarily unavailable. Please try again shortly.` };
+    }
+
+    const points = Array.isArray(data.forecast) ? data.forecast.slice(0, 16) : [];
+    if (!points.length) {
+      return { summary: `The AI summary service is temporarily unavailable for ${input.location}. Please try again shortly.` };
+    }
+
+    const descriptions = [...new Set(points.slice(0, 8).map((p: any) => String(p.weather || '').trim()).filter(Boolean))];
+    const temperatures = points.slice(0, 8).map((p: any) => Number.parseFloat(String(p.temp || '').replace('°C', ''))).filter(Number.isFinite);
+    const winds = points.slice(0, 8).map((p: any) => Number.parseFloat(String(p.wind_speed || '').replace('m/s', ''))).filter(Number.isFinite);
+    const maxTemp = temperatures.length ? Math.max(...temperatures) : null;
+    const minTemp = temperatures.length ? Math.min(...temperatures) : null;
+    const maxWind = winds.length ? Math.max(...winds) : null;
+
+    const conditions = descriptions.length ? descriptions.join(', ') : 'conditions unavailable';
+    const temperatureAdvice = maxTemp !== null && maxTemp >= 35
+      ? 'High temperatures may stress crops; check soil moisture and irrigate when needed.'
+      : minTemp !== null && minTemp <= 10
+        ? 'Cool conditions are expected; monitor sensitive crops.'
+        : 'Check soil moisture before scheduling irrigation.';
+    const windAdvice = maxWind !== null && maxWind >= 8
+      ? 'Strong winds may damage young plants, so secure supports where needed.'
+      : '';
+    const temperatureRange = minTemp !== null && maxTemp !== null ? ` Temperatures are around ${Math.round(minTemp)}–${Math.round(maxTemp)}°C.` : '';
+
+    return {
+      summary: `Forecast for ${input.location}: ${conditions} over the next forecast periods.${temperatureRange} ${temperatureAdvice} ${windAdvice}`.trim(),
+    };
   }
 );
