@@ -58,7 +58,6 @@ export function HeroSection() {
           >
             <a href="#features" className="hover:text-primary transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-primary transition-colors">How It Works</a>
-            <a href="#testimonials" className="hover:text-primary transition-colors">Testimonials</a>
 
             <button
               onClick={() => setMenuOpen(false)}
@@ -90,7 +89,7 @@ export function HeroSection() {
         </nav>
 
         <h1 className="text-4xl md:text-7xl font-medium max-w-[850px] text-center mx-auto pt-32 md:pt-32 text-white">
-          Empowering Farmers with AI-Powered SMS Alerts
+          Verdora: The Precision Agriculture Platform
         </h1>
 
         <p className="text-sm md:text-base mx-auto max-w-2xl text-center mt-6 max-md:px-2 text-white/80">
