@@ -18,4 +18,3 @@
 - Body and headline font: 'PT Sans', a humanist sans-serif font, for a modern yet warm and readable feel.
 - Simple, easily recognizable icons to represent weather conditions and crop types.
 - Clean and straightforward SMS layout for ease of understanding on basic mobile phones.
-<!-- Timestamp refresh only. -->
