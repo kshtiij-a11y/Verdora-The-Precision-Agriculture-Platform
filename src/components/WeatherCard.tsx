@@ -114,11 +114,11 @@ export function WeatherCard() {
 
       } catch (error: any) {
         console.error(error);
-        const errorMessage = error.message.includes("not found") 
+        const errorMessage = error.message?.includes("not found")
             ? `Could not find weather for "${loc}". Please check the spelling.`
-            : error.message.includes("Translation")
+            : error.message?.includes("Translation")
                 ? "Failed to translate weather summary."
-                : "Failed to get weather summary. Please check your API key.";
+                : (error.message || "Failed to get weather summary. Please check the OpenWeather and Gemini API configuration.");
         
         setResult({ summary: null, error: errorMessage });
         
