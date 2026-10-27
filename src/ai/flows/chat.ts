@@ -11,7 +11,6 @@
 import {ai} from '@/ai/genkit';
 import { getWeatherSummary, getMarketPrices, getAgricultureNews } from '@/ai/tools/agri-tools';
 import { googleAI } from '@genkit-ai/googleai';
-import { retry } from '@genkit-ai/middleware';
 import {Content, MessageData} from 'genkit/model';
 import {z} from 'zod';
 
@@ -61,16 +60,31 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
     promptParts.push({media: {url: imageDataUri}});
   }
 
-  const response = await ai.generate({
-    model: 'googleai/gemini-3.8-flash',
-    tools: [googleAI.trustedSearch, getWeatherSummary, getMarketPrices, getAgricultureNews],
-    history: [
-      {role: 'system', content: [{text: systemPrompt}]},
-      ...(history as MessageData[]),
-    ],
-    prompt: promptParts,
-    use: [retry({ maxRetries: 3, initialDelayMs: 1000, backoffFactor: 2 })],
-  });
+  let response;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      response = await ai.generate({
+        model: 'googleai/gemini-3.8-flash',
+        tools: [googleAI.trustedSearch, getWeatherSummary, getMarketPrices, getAgricultureNews],
+        history: [
+          {role: 'system', content: [{text: systemPrompt}]},
+          ...(history as MessageData[]),
+        ],
+        prompt: promptParts,
+      });
+      break;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const isTemporaryServerError = message.includes('503') || message.includes('Service Unavailable');
+      if (!isTemporaryServerError || attempt === 3) {
+        throw error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+    }
+  }
 
+  if (!response) {
+    throw new Error('Gemini did not return a response after retries.');
+  }
   return response.text;
 }
