@@ -1,13 +1,7 @@
-
 'use server';
 /**
- * @fileOverview A flow to send an SMS using Twilio.
- *
- * - sendSms - A function that sends an SMS message.
- * - SendSmsInput - The input type for the sendSms function.
- * - SendSmsOutput - The return type for the sendSms function.
+ * @fileOverview Send a concise SMS through Twilio.
  */
-
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import Twilio from 'twilio';
@@ -18,14 +12,14 @@ const RATE_LIMIT_MAX_PER_RECIPIENT = 3;
 const recipientSendLog = new Map<string, number[]>();
 
 const SendSmsInputSchema = z.object({
-  to: z.string().describe('The phone number to send the SMS to, in E.164 format (e.g., +15551234567).'),
-  message: z.string().describe('The content of the SMS message.'),
+  to: z.string().describe('Recipient phone number.'),
+  message: z.string().describe('SMS content.'),
 });
 export type SendSmsInput = z.infer<typeof SendSmsInputSchema>;
 
 const SendSmsOutputSchema = z.object({
-  status: z.string().describe('The status of the SMS sending attempt.'),
-  messageSid: z.string().optional().describe('The SID of the message from Twilio.'),
+  status: z.string(),
+  messageSid: z.string().optional(),
 });
 export type SendSmsOutput = z.infer<typeof SendSmsOutputSchema>;
 
@@ -35,77 +29,68 @@ export async function sendSms(input: SendSmsInput): Promise<SendSmsOutput> {
 
 function enforceRecipientRateLimit(recipient: string) {
   const now = Date.now();
-  const windowStart = now - RATE_LIMIT_WINDOW_MS;
-  const history = recipientSendLog.get(recipient) ?? [];
-  const recent = history.filter(timestamp => timestamp >= windowStart);
-
+  const recent = (recipientSendLog.get(recipient) ?? []).filter(t => t >= now - RATE_LIMIT_WINDOW_MS);
   if (recent.length >= RATE_LIMIT_MAX_PER_RECIPIENT) {
-    throw new Error('Rate limit exceeded for this recipient. Please wait before sending another SMS.');
+    throw new Error('SMS limit reached for this number. Wait 10 minutes before trying again.');
   }
 }
 
 function recordSuccessfulSend(recipient: string) {
   const now = Date.now();
-  const windowStart = now - RATE_LIMIT_WINDOW_MS;
-  const history = recipientSendLog.get(recipient) ?? [];
-  const recent = history.filter(timestamp => timestamp >= windowStart);
+  const recent = (recipientSendLog.get(recipient) ?? []).filter(t => t >= now - RATE_LIMIT_WINDOW_MS);
   recent.push(now);
   recipientSendLog.set(recipient, recent);
 }
 
+// Keep every outgoing app SMS to one short GSM-friendly segment where possible.
+function shortenSms(value: string) {
+  const plain = value.replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (plain.length <= 145 && /^[\x00-\x7F]*$/.test(plain)) return plain;
+  const ascii = plain.replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/[–—]/g, '-').replace(/[^\x20-\x7E]/g, '');
+  return ascii.length <= 142 ? ascii : `${ascii.slice(0, 139).trimEnd()}...`;
+}
+
 const sendSmsFlow = ai.defineFlow(
-  {
-    name: 'sendSmsFlow',
-    inputSchema: SendSmsInputSchema,
-    outputSchema: SendSmsOutputSchema,
-  },
+  { name: 'sendSmsFlow', inputSchema: SendSmsInputSchema, outputSchema: SendSmsOutputSchema },
   async (input) => {
     let { to, message } = input;
     const { accountSid, authToken, phoneNumber, messagingServiceSid } = twilioConfig;
-
     if (!accountSid || !authToken || (!phoneNumber && !messagingServiceSid)) {
-        throw new Error('Twilio credentials are not configured correctly. Please check your config.ts and .env file.');
+      throw new Error('SMS is not configured: check the Twilio account SID, auth token, and sender number or messaging service.');
     }
 
-    message = message.trim();
-    if (!message) {
-      throw new Error('SMS message cannot be empty.');
-    }
     to = to.trim();
-    if (/^\d{10}$/.test(to)) {
-      to = `+91${to}`;
-    } else if (!to.startsWith('+')) {
-      to = `+${to}`;
+    if (/^\d{10}$/.test(to)) to = `+91${to}`;
+    else if (!to.startsWith('+')) to = `+${to}`;
+    if (!/^\+[1-9]\d{1,14}$/.test(to)) {
+      throw new Error('Invalid recipient number. Use a 10-digit Indian mobile number or international format.');
     }
 
-    // Validate E.164 format
-    const e164Regex = /^\+[1-9]\d{1,14}$/;
-    if (!e164Regex.test(to)) {
-      throw new Error(`Invalid phone number format: ${to}. Number must be in E.164 format (e.g., +15551234567).`);
-    }
-
+    message = shortenSms(message);
+    if (!message) throw new Error('SMS content is empty.');
     enforceRecipientRateLimit(to);
 
-    // Initialize Twilio client inside the flow to ensure credentials are loaded
     const client = Twilio(accountSid, authToken);
-
     try {
-        const twilioMessage = await client.messages.create({
-            body: message,
-            ...(messagingServiceSid ? { messagingServiceSid } : { from: phoneNumber }),
-            to: to,
-        });
-        recordSuccessfulSend(to);
-
-        console.log(`SMS sent successfully. SID: ${twilioMessage.sid}`);
-        return {
-            status: `SMS sent successfully to ${to}`,
-            messageSid: twilioMessage.sid,
-        };
+      const sent = await client.messages.create({
+        body: message,
+        ...(messagingServiceSid ? { messagingServiceSid } : { from: phoneNumber }),
+        to,
+      });
+      recordSuccessfulSend(to);
+      console.log('SMS sent successfully', { sid: sent.sid, recipientLast4: to.slice(-4), length: message.length });
+      return { status: 'SMS sent successfully.', messageSid: sent.sid };
     } catch (error: any) {
-        const twilioCode = typeof error?.code === 'number' ? ` (Twilio code ${error.code})` : '';
-        console.error('Failed to send SMS via Twilio:', { code: error?.code, status: error?.status, message: error?.message });
-        throw new Error(`SMS delivery failed${twilioCode}: ${error?.message || 'Unknown Twilio error'}`);
+      const code = typeof error?.code === 'number' ? error.code : undefined;
+      const raw = String(error?.message ?? 'Unknown Twilio error');
+      console.error('Twilio SMS failed', { code, status: error?.status, message: raw });
+      if (/trial accounts|trial account|unverified|verified recipient|upgrade your account|disallowed parameters/i.test(raw) || code === 21608) {
+        throw new Error('Twilio trial restriction: verify this recipient in the Twilio Console or upgrade the Twilio account. Shortening the message cannot bypass this restriction.');
+      }
+      if (code === 21606 || code === 21612 || code === 21408) {
+        throw new Error('Twilio rejected the sender or destination. Check that the sender is enabled for SMS and permitted to message this country.');
+      }
+      throw new Error(`SMS delivery failed${code ? ` (Twilio ${code})` : ''}. Check the Twilio Messaging logs for the exact reason.`);
     }
   }
 );
