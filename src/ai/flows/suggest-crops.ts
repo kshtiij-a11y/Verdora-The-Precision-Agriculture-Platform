@@ -12,12 +12,12 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SuggestCropsInputSchema = z.object({
-  location: z.string().describe('The district or general location in India to suggest crops for.'),
+  location: z.string().trim().min(2, 'Please provide a valid district or location.').max(120, 'Location is too long.').describe('The district or general location in India to suggest crops for.'),
 });
 export type SuggestCropsInput = z.infer<typeof SuggestCropsInputSchema>;
 
 const SuggestCropsOutputSchema = z.object({
-  suggestedCrops: z.array(z.string()).describe('A list of 5-10 crop names suitable for the given location.'),
+  suggestedCrops: z.array(z.string().trim().min(1)).min(5).max(10).describe('A list of 5-10 crop names suitable for the given location.'),
 });
 export type SuggestCropsOutput = z.infer<typeof SuggestCropsOutputSchema>;
 
@@ -44,6 +44,11 @@ const suggestCropsFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output || output.suggestedCrops.length < 5) {
+      throw new Error('The crop recommendation model returned an incomplete result.');
+    }
+    return {
+      suggestedCrops: [...new Set(output.suggestedCrops.map(crop => crop.trim()))].slice(0, 10),
+    };
   }
 );
