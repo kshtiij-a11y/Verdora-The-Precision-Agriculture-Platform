@@ -74,14 +74,15 @@ const sendSmsFlow = ai.defineFlow(
     try {
       const sent = await client.messages.create({
         body: message,
-        ...(messagingServiceSid ? { messagingServiceSid } : { from: phoneNumber }),
+        ...(phoneNumber ? { from: phoneNumber } : { messagingServiceSid }),
         to,
       });
       recordSuccessfulSend(to);
       console.log('SMS sent successfully', { sid: sent.sid, recipientLast4: to.slice(-4), length: message.length });
       return { status: 'SMS sent successfully.', messageSid: sent.sid };
     } catch (error: any) {
-      const code = typeof error?.code === 'number' ? error.code : undefined;
+      const parsedCode = Number(error?.code);
+      const code = Number.isFinite(parsedCode) && parsedCode > 0 ? parsedCode : undefined;
       const raw = String(error?.message ?? 'Unknown Twilio error');
       console.error('Twilio SMS failed', { code, status: error?.status, message: raw });
       if (/trial accounts|trial account|unverified|verified recipient|upgrade your account|disallowed parameters/i.test(raw) || code === 21608) {
