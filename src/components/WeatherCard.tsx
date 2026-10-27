@@ -31,7 +31,7 @@ import { useAppContext } from "@/context/AppContext";
 import { textToSpeech } from "@/ai/flows/text-to-speech";
 import { fetchWeatherData } from "@/app/actions/weather";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useFarmerAppContext } from "@/context/FarmerAppContext";
+import { useOptionalFarmerAppContext } from "@/context/FarmerAppContext";
 
 type ServerActionResult = {
   summary: string | null;
@@ -44,10 +44,7 @@ export function WeatherCard() {
 
   const { registeredFarmer, addSmsToHistory } = useAppContext();
   
-  let farmerContext;
-  if (isFarmerPortal) {
-    farmerContext = useFarmerAppContext();
-  }
+  const farmerContext = useOptionalFarmerAppContext();
   const { availableLanguages = { English: 'English' } } = farmerContext || {};
   
   const [isForecastPending, startForecastTransition] = useTransition();
