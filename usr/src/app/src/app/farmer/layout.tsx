@@ -21,4 +21,4 @@ export default function FarmerLayout({
   );
 }
 
-# Timestamp refresh only.
+// Timestamp refresh only.
