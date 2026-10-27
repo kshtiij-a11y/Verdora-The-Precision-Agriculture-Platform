@@ -18,5 +18,3 @@ export default function Home() {
     </div>
   );
 }
-
-// Repository maintenance: timestamp refresh only.
