@@ -71,7 +71,24 @@ const verifyIdFlow = ai.defineFlow(
     outputSchema: VerifyIdOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input, { model: 'googleai/gemini-3.8-flash' });
-    return output!;
+    // Retry transient Gemini overloads before failing verification.
+    const delays = [0, 1000, 2500];
+    let lastError: unknown;
+
+    for (const delay of delays) {
+      if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+      try {
+        const {output} = await prompt(input, { model: 'googleai/gemini-3.8-flash' });
+        if (!output) throw new Error('The AI service returned an empty verification result.');
+        return output;
+      } catch (error) {
+        lastError = error;
+        const message = error instanceof Error ? error.message : String(error);
+        const transient = /503|429|502|504|temporar|high demand|overloaded/i.test(message);
+        if (!transient) throw error;
+      }
+    }
+
+    throw new Error('ID verification service is temporarily overloaded. Please retry shortly.');
   }
 );
