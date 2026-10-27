@@ -121,7 +121,7 @@ export function LandingPage() {
             <div className="text-center mb-12 space-y-2 fade-in">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Trusted by Farmers</h2>
               <p className="max-w-2xl mx-auto text-white/80 md:text-xl/relaxed">
-                Hear what farmers are saying about AgriAssist SMS.
+                Hear what farmers are saying about Verdora | The Precision Agriculture Platform.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -168,7 +168,7 @@ export function LandingPage() {
 
       <footer className="border-t border-white/10 py-4">
         <div className="container flex flex-col md:flex-row items-center justify-between text-sm text-white/70">
-          <p>© {new Date().getFullYear()} AgriAssist SMS. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Verdora | The Precision Agriculture Platform. All rights reserved.</p>
           <div className="flex gap-4 mt-4 md:mt-0">
             <Link href="#" className="hover:text-white">Privacy Policy</Link>
             <Link href="#" className="hover:text-white">Terms of Service</Link>
