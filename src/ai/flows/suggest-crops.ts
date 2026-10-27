@@ -44,11 +44,15 @@ const suggestCropsFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    if (!output || output.suggestedCrops.length < 5) {
-      throw new Error('The crop recommendation model returned an incomplete result.');
+    if (!output) {
+      throw new Error('The crop recommendation model returned no result.');
     }
-    return {
-      suggestedCrops: [...new Set(output.suggestedCrops.map(crop => crop.trim()))].slice(0, 10),
-    };
+
+    const suggestedCrops = [...new Set(output.suggestedCrops.map(crop => crop.trim()).filter(Boolean))].slice(0, 10);
+    if (suggestedCrops.length < 5) {
+      throw new Error('The crop recommendation model returned fewer than five distinct crops.');
+    }
+
+    return { suggestedCrops };
   }
 );
