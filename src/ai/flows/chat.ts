@@ -10,7 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import { getWeatherSummary, getMarketPrices, getAgricultureNews } from '@/ai/tools/agri-tools';
-import { googleAI } from '@genkit-ai/googleai';
 import {z} from 'zod';
 
 const ChatInputSchema = z.object({
@@ -36,7 +35,7 @@ You MUST adhere to the following rules strictly:
     -   For weather questions, ALWAYS use the 'getWeatherSummary' tool.
     -   For crop market prices, ALWAYS use the 'getMarketPrices' tool. You will receive structured data; format it into a user-friendly string.
     -   For farming news, ALWAYS use the 'getAgricultureNews' tool.
-    -   For any other general agriculture question (pests, diseases, techniques), ALWAYS use the 'trustedSearch' tool.
+    -   For other agriculture questions, use only the available weather, market-price, and agriculture-news tools when relevant. If they do not provide reliable relevant information, reply with the uncertainty message below.
 2.  **CITE YOUR SOURCES:** Every piece of information you provide MUST be attributed to its source (e.g., "Source: Weather API", "Source: Trusted Search", "Source: App Market Dataset").
 3.  **Structured Responses:** Structure your advice clearly for the farmer:
     -   **Issue:** Briefly state the problem.
@@ -64,7 +63,7 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
     try {
       response = await ai.generate({
         model: 'googleai/gemini-3.8-flash',
-        tools: [googleAI.trustedSearch, getWeatherSummary, getMarketPrices, getAgricultureNews],
+        tools: [getWeatherSummary, getMarketPrices, getAgricultureNews],
         prompt: [
           {text: `System instructions:\n${systemPrompt}`},
           ...history.flatMap(message =>
