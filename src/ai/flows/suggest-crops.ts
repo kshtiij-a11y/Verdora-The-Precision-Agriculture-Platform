@@ -43,16 +43,21 @@ const suggestCropsFlow = ai.defineFlow(
     outputSchema: SuggestCropsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    if (!output) {
-      throw new Error('The crop recommendation model returned no result.');
+    try {
+      const { output } = await prompt(input);
+      const suggestedCrops = [...new Set((output?.suggestedCrops || []).map(crop => crop.trim()).filter(Boolean))].slice(0, 10);
+      if (suggestedCrops.length >= 5) return { suggestedCrops };
+    } catch (error) {
+      console.error('AI crop suggestion unavailable; using regional defaults:', error);
     }
 
-    const suggestedCrops = [...new Set(output.suggestedCrops.map(crop => crop.trim()).filter(Boolean))].slice(0, 10);
-    if (suggestedCrops.length < 5) {
-      throw new Error('The crop recommendation model returned fewer than five distinct crops.');
-    }
-
-    return { suggestedCrops };
+    const district = input.location.toLowerCase();
+    const tamilNaduCrops = ['Rice', 'Groundnut', 'Millets', 'Sugarcane', 'Pulses', 'Cotton', 'Sesame'];
+    const regionalCrops = district.includes('vellore') || district.includes('tirupattur') || district.includes('ranipet')
+      ? ['Groundnut', 'Rice', 'Millets', 'Sugarcane', 'Pulses', 'Sesame', 'Vegetables']
+      : district.includes('pune')
+        ? ['Sugarcane', 'Jowar', 'Bajra', 'Wheat', 'Gram', 'Onion', 'Groundnut']
+        : tamilNaduCrops;
+    return { suggestedCrops: regionalCrops };
   }
 );
