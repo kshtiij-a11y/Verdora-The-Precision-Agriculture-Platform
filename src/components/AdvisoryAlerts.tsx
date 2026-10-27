@@ -178,7 +178,7 @@ export function AdvisoryAlerts() {
           toast({
               variant: "destructive",
               title: "SMS Error",
-              description: "Could not send the SMS. Please try again.",
+              description: error instanceof Error ? error.message : "Could not send the SMS. Please try again.",
           });
         }
       });
