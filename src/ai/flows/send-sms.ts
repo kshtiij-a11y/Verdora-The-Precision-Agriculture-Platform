@@ -62,9 +62,9 @@ const sendSmsFlow = ai.defineFlow(
   },
   async (input) => {
     let { to, message } = input;
-    const { accountSid, authToken, phoneNumber } = twilioConfig;
+    const { accountSid, authToken, phoneNumber, messagingServiceSid } = twilioConfig;
 
-    if (!accountSid || !authToken || !phoneNumber) {
+    if (!accountSid || !authToken || (!phoneNumber && !messagingServiceSid)) {
         throw new Error('Twilio credentials are not configured correctly. Please check your config.ts and .env file.');
     }
 
@@ -97,7 +97,7 @@ const sendSmsFlow = ai.defineFlow(
     try {
         const twilioMessage = await client.messages.create({
             body: message,
-            from: phoneNumber,
+            ...(messagingServiceSid ? { messagingServiceSid } : { from: phoneNumber }),
             to: to,
         });
         recordSuccessfulSend(to);
@@ -108,8 +108,9 @@ const sendSmsFlow = ai.defineFlow(
             messageSid: twilioMessage.sid,
         };
     } catch (error: any) {
-        console.error('Failed to send SMS via Twilio:', error);
-        throw new Error(`Failed to send SMS. Twilio error: ${error.message}`);
+        const twilioCode = typeof error?.code === 'number' ? ` (Twilio code ${error.code})` : '';
+        console.error('Failed to send SMS via Twilio:', { code: error?.code, status: error?.status, message: error?.message });
+        throw new Error(`SMS delivery failed${twilioCode}: ${error?.message || 'Unknown Twilio error'}`);
     }
   }
 );
