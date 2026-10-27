@@ -104,3 +104,5 @@ Follow these instructions to get a local copy up and running.
 - `src/lib/`: Utility functions and Firebase configuration.
 - `src/translations/`: JSON files for multilingual support.
 - `public/`: Static assets.
+
+<!-- Repository maintenance: timestamp refresh only. -->
