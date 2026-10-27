@@ -13,7 +13,6 @@ import { z } from 'genkit';
 import Twilio from 'twilio';
 import { twilioConfig } from '@/config';
 
-const MAX_SMS_LENGTH = 160;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_PER_RECIPIENT = 3;
 const recipientSendLog = new Map<string, number[]>();
@@ -72,10 +71,6 @@ const sendSmsFlow = ai.defineFlow(
     if (!message) {
       throw new Error('SMS message cannot be empty.');
     }
-    if (message.length > MAX_SMS_LENGTH) {
-      throw new Error(`SMS message exceeds ${MAX_SMS_LENGTH} characters.`);
-    }
-
     to = to.trim();
     if (/^\d{10}$/.test(to)) {
       to = `+91${to}`;
