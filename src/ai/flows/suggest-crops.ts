@@ -9,7 +9,6 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {withTransientModelRetry} from '@/ai/retry';
 import {z} from 'genkit';
 
 const SuggestCropsInputSchema = z.object({
@@ -44,7 +43,7 @@ const suggestCropsFlow = ai.defineFlow(
     outputSchema: SuggestCropsOutputSchema,
   },
   async input => {
-    const {output} = await withTransientModelRetry(() => prompt(input));
+    const {output} = await prompt(input);
     return output!;
   }
 );
