@@ -11,6 +11,7 @@
 import {ai} from '@/ai/genkit';
 import { getWeatherSummary, getMarketPrices, getAgricultureNews } from '@/ai/tools/agri-tools';
 import { googleAI } from '@genkit-ai/googleai';
+import { retry } from '@genkit-ai/middleware';
 import {Content, MessageData} from 'genkit/model';
 import {z} from 'zod';
 
@@ -68,6 +69,7 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
       ...(history as MessageData[]),
     ],
     prompt: promptParts,
+    use: [retry({ maxRetries: 3, initialDelayMs: 1000, backoffFactor: 2 })],
   });
 
   return response.text;
