@@ -166,7 +166,13 @@ export function UserManagement({ isAdmin = false }: { isAdmin?: boolean }) {
     setVerificationStatus('pending');
     startVerifyTransition(async () => {
         try {
-            const result = await verifyId({ photoDataUri: formData.idProof! });
+            // Do not leave the registration form spinning forever if the AI provider stalls.
+            const result = await Promise.race([
+                verifyId({ photoDataUri: formData.idProof! }),
+                new Promise<never>((_, reject) =>
+                    setTimeout(() => reject(new Error("ID verification timed out after 25 seconds.")), 25000)
+                ),
+            ]);
             setVerificationResult(result);
             if (result.isIdCard) {
                 setVerificationStatus('success');
@@ -181,8 +187,11 @@ export function UserManagement({ isAdmin = false }: { isAdmin?: boolean }) {
         } catch (error) {
             console.error("Verification failed:", error);
             setVerificationStatus('failed');
-            setVerificationResult({ isIdCard: false, reason: 'An unexpected error occurred during verification.' });
-            toast({ variant: "destructive", title: "Verification Error", description: "Could not verify the ID. Please try again." });
+            const message = error instanceof Error && error.message.includes("timed out")
+                ? "Verification is taking too long because the AI service may be unavailable. Please try again shortly."
+                : "Could not verify the ID. Please try again.";
+            setVerificationResult({ isIdCard: false, reason: message });
+            toast({ variant: "destructive", title: "Verification Error", description: message });
         }
     });
   };
