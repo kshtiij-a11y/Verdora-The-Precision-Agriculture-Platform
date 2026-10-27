@@ -11,7 +11,6 @@
 import {ai} from '@/ai/genkit';
 import { getWeatherSummary, getMarketPrices, getAgricultureNews } from '@/ai/tools/agri-tools';
 import { googleAI } from '@genkit-ai/googleai';
-import {Content, MessageData} from 'genkit/model';
 import {z} from 'zod';
 
 const ChatInputSchema = z.object({
@@ -55,7 +54,7 @@ Your primary goal is accuracy and farmer safety. Failure to follow these rules i
 export async function chat(input: ChatInput): Promise<ChatOutput> {
   const {history, prompt, imageDataUri} = input;
 
-  const promptParts: Content[] = [{text: prompt}];
+  const promptParts: ({text: string; media?: never} | {text?: never; media: {url: string}})[] = [{text: prompt}];
   if (imageDataUri) {
     promptParts.push({media: {url: imageDataUri}});
   }
@@ -68,7 +67,7 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
         tools: [googleAI.trustedSearch, getWeatherSummary, getMarketPrices, getAgricultureNews],
         history: [
           {role: 'system', content: [{text: systemPrompt}]},
-          ...(history as MessageData[]),
+          ...history,
         ],
         prompt: promptParts,
       });
