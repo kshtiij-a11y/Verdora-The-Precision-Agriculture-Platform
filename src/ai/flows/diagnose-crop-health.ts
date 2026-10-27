@@ -62,7 +62,13 @@ const diagnoseCropHealthFlow = ai.defineFlow(
     outputSchema: DiagnoseCropHealthOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input, { model: 'googleai/gemini-3.8-flash' });
-    return output!;
+    try {
+      const {output} = await prompt(input, { model: 'googleai/gemini-3.5-flash-lite' });
+      if (output) return output;
+      throw new Error('The model returned no diagnosis.');
+    } catch (error) {
+      console.error('Crop diagnosis failed:', error);
+      throw new Error('Crop diagnosis is temporarily unavailable. Please try again shortly, or upload a clearer plant photo.');
+    }
   }
 );
