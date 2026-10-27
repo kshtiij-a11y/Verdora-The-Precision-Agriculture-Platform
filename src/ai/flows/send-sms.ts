@@ -62,9 +62,9 @@ const sendSmsFlow = ai.defineFlow(
   },
   async (input) => {
     let { to, message } = input;
-    const { accountSid, authToken, messagingServiceSid } = twilioConfig;
+    const { accountSid, authToken, phoneNumber } = twilioConfig;
 
-    if (!accountSid || !authToken || !messagingServiceSid) {
+    if (!accountSid || !authToken || !phoneNumber) {
         throw new Error('Twilio credentials are not configured correctly. Please check your config.ts and .env file.');
     }
 
@@ -77,7 +77,9 @@ const sendSmsFlow = ai.defineFlow(
     }
 
     to = to.trim();
-    if (!to.startsWith('+')) {
+    if (/^\d{10}$/.test(to)) {
+      to = `+91${to}`;
+    } else if (!to.startsWith('+')) {
       to = `+${to}`;
     }
 
@@ -95,7 +97,7 @@ const sendSmsFlow = ai.defineFlow(
     try {
         const twilioMessage = await client.messages.create({
             body: message,
-            messagingServiceSid: messagingServiceSid,
+            from: phoneNumber,
             to: to,
         });
         recordSuccessfulSend(to);
