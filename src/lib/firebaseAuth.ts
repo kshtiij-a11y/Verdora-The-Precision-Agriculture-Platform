@@ -16,6 +16,7 @@ export async function ensureAuth() {
       console.log("User signed in anonymously.");
     } catch (error) {
       console.error("Anonymous sign-in failed:", error);
+      throw new Error("Firebase anonymous sign-in failed. Enable Anonymous sign-in in Firebase Authentication and check authorized domains.");
     }
   }
 }
