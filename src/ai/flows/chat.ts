@@ -65,11 +65,15 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
       response = await ai.generate({
         model: 'googleai/gemini-3.8-flash',
         tools: [googleAI.trustedSearch, getWeatherSummary, getMarketPrices, getAgricultureNews],
-        history: [
-          {role: 'system', content: [{text: systemPrompt}]},
-          ...history,
+        prompt: [
+          {text: `System instructions:\n${systemPrompt}`},
+          ...history.flatMap(message =>
+            message.content.map(part => ({
+              text: `${message.role === 'user' ? 'Farmer' : 'Assistant'}: ${part.text}`,
+            }))
+          ),
+          ...promptParts,
         ],
-        prompt: promptParts,
       });
       break;
     } catch (error) {
