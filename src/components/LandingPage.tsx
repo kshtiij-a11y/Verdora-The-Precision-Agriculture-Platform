@@ -131,5 +131,3 @@ export function LandingPage() {
     </div>
   );
 }
-
-// Repository maintenance: timestamp refresh only.
