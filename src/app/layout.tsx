@@ -8,8 +8,8 @@ import { MainContent } from '@/components/MainContent';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata: Metadata = {
-  title: 'AgriAssist SMS',
-  description: 'Crop Advisory & Weather Alerts for Farmers',
+  title: 'Verdora | The Precision Agriculture Platform',
+  description: 'Verdora: The Precision Agriculture Platform for crop insights, weather, and farmer advisories.',
 };
 
 export default function RootLayout({
