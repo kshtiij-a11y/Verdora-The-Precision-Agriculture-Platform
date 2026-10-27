@@ -136,7 +136,7 @@ export const getMarketPrices = ai.defineTool(
         return { found: false, crop: input.crop, location: input.location };
     }
 
-    const priceInfo = cropData[locationKey];
+    const priceInfo = cropData[locationKey] as { min: number; modal: number; max: number };
     return {
         found: true,
         crop: input.crop,
