@@ -16,7 +16,7 @@ export function RoleSelectionPage() {
                         <Leaf className="text-primary" size={32} />
                     </div>
                     <h1 className="text-4xl font-bold text-foreground tracking-tight">
-                        Welcome to Verdora | The Precision Agriculture Platform
+                        Welcome to Verdora, the Precision Agriculture Platform
                     </h1>
                 </div>
                 <p className="text-lg text-muted-foreground max-w-2xl">
