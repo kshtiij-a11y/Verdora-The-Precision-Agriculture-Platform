@@ -39,11 +39,10 @@ export function ChatAssistant() {
   const { t } = useTranslation();
   
   const viewportRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (viewportRef.current) {
-      viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
-    }
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, isPending]);
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -161,8 +160,8 @@ export function ChatAssistant() {
         </div>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col min-h-0">
-        <ScrollArea className="flex-grow" ref={scrollAreaRef} viewportRef={viewportRef}>
-          <div className="space-y-4 pr-4">
+        <ScrollArea className="h-[55vh] min-h-[280px] flex-none w-full pr-1" ref={scrollAreaRef} viewportRef={viewportRef}>
+          <div className="space-y-4 pr-3 pb-3">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -186,7 +185,27 @@ export function ChatAssistant() {
                 >
                   {msg.content.map((part, partIndex) => {
                     if (part.text) {
-                      return <p key={partIndex}>{part.text}</p>;
+                      const lines = part.text.split(/\r?\n/);
+                      return (
+                        <div key={partIndex} className="space-y-2 leading-6 whitespace-normal">
+                          {lines.map((line, lineIndex) => {
+                            const trimmed = line.trim();
+                            if (!trimmed) return <div key={lineIndex} className="h-1" />;
+                            const isBullet = /^[-*•]\s+/.test(trimmed);
+                            const isNumbered = /^\d+[.)]\s+/.test(trimmed);
+                            const clean = trimmed.replace(/^[-*•]\s+/, "").replace(/^\d+[.)]\s+/, "");
+                            const parts = clean.split(/(\*\*[^*]+\*\*)/g);
+                            return (
+                              <div key={lineIndex} className={cn(isBullet || isNumbered ? "pl-3" : "", /^#{1,3}\s/.test(clean) ? "font-semibold text-base" : "")}>
+                                {isBullet ? "• " : isNumbered ? (trimmed.match(/^\d+[.)]/)?.[0] || "") + " " : ""}
+                                {parts.map((part, i) => part.startsWith("**") && part.endsWith("**")
+                                  ? <strong key={i}>{part.slice(2, -2)}</strong>
+                                  : <span key={i}>{part.replace(/^#{1,3}\s+/, "")}</span>)}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
                     }
                     if (part.media) {
                       return (
@@ -221,6 +240,7 @@ export function ChatAssistant() {
                     </div>
                 </div>
             )}
+            <div ref={bottomRef} />
           </div>
         </ScrollArea>
       </CardContent>
