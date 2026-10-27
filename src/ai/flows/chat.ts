@@ -9,7 +9,6 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {withTransientModelRetry} from '@/ai/retry';
 import { getWeatherSummary, getMarketPrices, getAgricultureNews } from '@/ai/tools/agri-tools';
 import { googleAI } from '@genkit-ai/googleai';
 import {Content, MessageData} from 'genkit/model';
@@ -61,15 +60,15 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
     promptParts.push({media: {url: imageDataUri}});
   }
 
-  const response = await withTransientModelRetry(() => ai.generate({
-    model: 'googleai/gemini-3.8-flash',
+  const response = await ai.generate({
+    model: 'googleai/gemini-2.5-flash',
     tools: [googleAI.trustedSearch, getWeatherSummary, getMarketPrices, getAgricultureNews],
     history: [
       {role: 'system', content: [{text: systemPrompt}]},
       ...(history as MessageData[]),
     ],
     prompt: promptParts,
-  }));
+  });
 
   return response.text;
 }
