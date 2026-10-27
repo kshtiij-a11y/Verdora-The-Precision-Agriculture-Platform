@@ -6,7 +6,3 @@ const config = {
 };
 
 export default config;
-
-# Timestamp refresh only.
-
-// Timestamp refresh only.
