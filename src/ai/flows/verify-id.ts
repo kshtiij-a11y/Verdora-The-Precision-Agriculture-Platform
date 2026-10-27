@@ -9,7 +9,6 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {withTransientModelRetry} from '@/ai/retry';
 import {z} from 'genkit';
 
 const VerifyIdInputSchema = z.object({
@@ -72,7 +71,7 @@ const verifyIdFlow = ai.defineFlow(
     outputSchema: VerifyIdOutputSchema,
   },
   async input => {
-    const {output} = await withTransientModelRetry(() => prompt(input, { model: 'googleai/gemini-3.8-flash' }));
+    const {output} = await prompt(input, { model: 'googleai/gemini-2.5-flash' });
     return output!;
   }
 );
