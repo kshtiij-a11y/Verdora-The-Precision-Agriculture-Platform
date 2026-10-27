@@ -45,7 +45,13 @@ const translateAdvisoryAlertsFlow = ai.defineFlow(
     outputSchema: TranslateAdvisoryAlertsOutputSchema,
   },
   async input => {
-    const {output} = await translateAdvisoryAlertsPrompt(input, { model: 'googleai/gemini-3.8-flash' });
-    return output!;
+    try {
+      const {output} = await translateAdvisoryAlertsPrompt(input, { model: 'googleai/gemini-3.5-flash-lite' });
+      if (output?.translatedText) return output;
+      throw new Error('The translation model returned no text.');
+    } catch (error) {
+      console.error('Advisory translation failed:', error);
+      throw new Error('Translation is temporarily unavailable. Please try again shortly.');
+    }
   }
 );
