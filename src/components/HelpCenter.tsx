@@ -64,8 +64,8 @@ export function HelpCenter() {
                 <Mail className="w-6 h-6 text-primary" />
                 <div>
                     <p className="font-semibold">{t('help.emailSupport', 'Email Support')}</p>
-                    <a href="mailto:support@agriassistsms.farm" className="text-sm text-muted-foreground hover:underline">
-                        support@agriassistsms.farm
+                    <a href="mailto:support@verdora.ag" className="text-sm text-muted-foreground hover:underline">
+                        support@verdora.ag
                     </a>
                 </div>
              </div>
@@ -83,7 +83,7 @@ export function HelpCenter() {
           <CardHeader>
             <CardTitle>{t('help.faq', 'Frequently Asked Questions (FAQ)')}</CardTitle>
             <CardDescription>
-              {t('help.faqDescription', 'Find answers to common questions about the AgriAssist SMS platform.')}
+              {t('help.faqDescription', 'Find answers to common questions about the Verdora platform.')}
             </CardDescription>
           </CardHeader>
           <CardContent>
