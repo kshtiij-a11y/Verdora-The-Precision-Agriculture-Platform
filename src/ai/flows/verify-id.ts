@@ -78,7 +78,8 @@ const verifyIdFlow = ai.defineFlow(
     for (const delay of delays) {
       if (delay) await new Promise(resolve => setTimeout(resolve, delay));
       try {
-        const {output} = await prompt(input, { model: 'googleai/gemini-3.8-flash' });
+        const model = delay === 0 ? 'googleai/gemini-3.5-flash-lite' : 'googleai/gemini-3.8-flash';
+        const {output} = await prompt(input, { model });
         if (!output) throw new Error('The AI service returned an empty verification result.');
         return output;
       } catch (error) {
