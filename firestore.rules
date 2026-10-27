@@ -38,7 +38,3 @@ service cloud.firestore {
     }
   }
 }
-
-// Timestamp refresh only.
-
-// Timestamp refresh only.
