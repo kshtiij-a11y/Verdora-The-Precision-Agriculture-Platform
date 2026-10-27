@@ -94,3 +94,6 @@ export const useFarmerAppContext = () => {
   }
   return context;
 };
+
+// Allows shared components to read farmer preferences outside the farmer portal.
+export const useOptionalFarmerAppContext = () => useContext(FarmerAppContext);
