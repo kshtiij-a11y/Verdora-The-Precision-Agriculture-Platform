@@ -1,7 +1,7 @@
 
 {
   "header": {
-    "title": "AgriAssist SMS"
+    "title": "Verdora | The Precision Agriculture Platform"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -147,7 +147,7 @@
     "emailSupport": "Email Support",
     "phoneSupport": "Phone Support",
     "faq": "Frequently Asked Questions (FAQ)",
-    "faqDescription": "Find answers to common questions about the AgriAssist SMS platform.",
+    "faqDescription": "Find answers to common questions about the Verdora | The Precision Agriculture Platform platform.",
     "faq1": {
       "question": "How do I register a new farmer?",
       "answer": "Navigate to the main Dashboard. If no farmer is registered, you will see a form. Fill in the farmer's name, phone number, location, primary and secondary crops, and preferred language, then click 'Register Farmer'."
