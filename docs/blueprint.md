@@ -19,3 +19,5 @@
 - Simple, easily recognizable icons to represent weather conditions and crop types.
 - Clean and straightforward SMS layout for ease of understanding on basic mobile phones.
 <!-- Timestamp refresh only. -->
+
+<!-- Timestamp refresh only. -->
