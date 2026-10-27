@@ -16,7 +16,7 @@ export function RoleSelectionPage() {
                         <Leaf className="text-primary" size={32} />
                     </div>
                     <h1 className="text-4xl font-bold text-foreground tracking-tight">
-                        Welcome to AgriAssist SMS
+                        Welcome to Verdora | The Precision Agriculture Platform
                     </h1>
                 </div>
                 <p className="text-lg text-muted-foreground max-w-2xl">
@@ -65,7 +65,7 @@ export function RoleSelectionPage() {
             </div>
              <footer className="py-6 px-4 md:px-6 mt-12">
                 <div className="container mx-auto text-center text-sm text-muted-foreground">
-                © {new Date().getFullYear()} AgriAssist SMS. All rights reserved.
+                © {new Date().getFullYear()} Verdora. All rights reserved.
                 </div>
             </footer>
         </div>
