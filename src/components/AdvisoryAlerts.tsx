@@ -122,6 +122,10 @@ export function AdvisoryAlerts() {
     }
     startTranslateTransition(async () => {
       try {
+        if (language === "English") {
+          setTranslatedText(alertText);
+          return;
+        }
         const res = await translateAdvisoryAlerts({
           text: alertText,
           language,
@@ -133,10 +137,12 @@ export function AdvisoryAlerts() {
         }
       } catch (err: any) {
         console.error("Translation failed:", err);
+        // Keep the original alert sendable when translation service is unavailable.
+        setTranslatedText(alertText);
         toast({
           variant: "destructive",
-          title: "Translation Error",
-          description: err.message || "Could not translate the advisory alert. Please try again.",
+          title: "Translation Unavailable",
+          description: "The original English alert is ready to send by SMS.",
         });
       }
     });
@@ -151,19 +157,20 @@ export function AdvisoryAlerts() {
       });
       return;
     }
-    if (translatedText) {
+    const messageToSend = translatedText || alertText;
+    if (messageToSend) {
       startSmsTransition(async () => {
         try {
-          const res = await sendSms({ to: registeredFarmer.phone, message: translatedText });
+          const res = await sendSms({ to: registeredFarmer.phone, message: messageToSend });
           setSmsStatus(res.status);
           addSmsToHistory({
             to: registeredFarmer.phone,
-            message: translatedText,
+            message: messageToSend,
             type: 'Advisory',
           });
           toast({
               title: "SMS Sent!",
-              description: `Message sent to ${registeredFarmer.name} at ${registeredFarmer.phone}`,
+              description: res.status || `Message sent to ${registeredFarmer.name} at ${registeredFarmer.phone}`,
           });
         } catch (error) {
           console.error("SMS sending failed", error);
@@ -307,7 +314,7 @@ export function AdvisoryAlerts() {
         <CardFooter>
           <Button 
             onClick={handleSendSms} 
-            disabled={!translatedText || isTranslatePending || isSmsPending} 
+            disabled={(!translatedText && !alertText) || isTranslatePending || isSmsPending} 
             className="w-full"
             variant="secondary"
             size="sm"
