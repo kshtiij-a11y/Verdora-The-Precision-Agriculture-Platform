@@ -61,7 +61,7 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
   }
 
   const response = await ai.generate({
-    model: 'googleai/gemini-2.5-flash',
+    model: 'googleai/gemini-3.8-flash',
     tools: [googleAI.trustedSearch, getWeatherSummary, getMarketPrices, getAgricultureNews],
     history: [
       {role: 'system', content: [{text: systemPrompt}]},
