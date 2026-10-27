@@ -40,9 +40,9 @@ export function HeroSection() {
         className="w-full text-sm"
       >
         <nav className="flex items-center justify-between p-4 md:px-16 lg:px-24 xl:px-32 md:py-6 w-full text-white">
-          <Link href="/" aria-label="AgriAssist SMS home" className="flex items-center gap-2">
+          <Link href="/" aria-label="Verdora | The Precision Agriculture Platform home" className="flex items-center gap-2">
             <Leaf className="w-8 h-8 text-primary" />
-            <span className="font-bold text-lg">AgriAssist SMS</span>
+            <span className="font-bold text-lg">Verdora | The Precision Agriculture Platform</span>
           </Link>
 
           <div
