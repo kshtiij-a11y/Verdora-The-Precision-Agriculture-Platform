@@ -39,5 +39,3 @@ export function Header() {
     </header>
   );
 }
-
-// Repository maintenance: timestamp refresh only.
